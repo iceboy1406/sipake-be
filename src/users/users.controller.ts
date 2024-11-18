@@ -36,7 +36,6 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ResponseMessage('Berhasil mendapatkan data profil')
   getProfile(@Request() req: { username: string }) {
-    console.log({ req });
     return this.usersService.getProfile(req.username);
   }
 }

@@ -1,34 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Body } from '@nestjs/common';
 import { ConsultationsService } from './consultations.service';
-import { CreateConsultationDto } from './dto/create-consultation.dto';
-import { UpdateConsultationDto } from './dto/update-consultation.dto';
+import { ResponseMessage } from '../common/decorators/response-message.decorator';
+import { AuthGuard } from '../common/guards/auth.guard';
+import { ConsultationProcessDto } from './dto/consultation-process.dto';
 
 @Controller('consultations')
 export class ConsultationsController {
   constructor(private readonly consultationsService: ConsultationsService) {}
 
-  @Post()
-  create(@Body() createConsultationDto: CreateConsultationDto) {
-    return this.consultationsService.create(createConsultationDto);
+  @Post('start')
+  @ResponseMessage('Konsultasi dimulai')
+  @UseGuards(AuthGuard)
+  startConsultation(@Request() req: { username: string }) {
+    return this.consultationsService.startConsultation(req.username);
   }
 
-  @Get()
-  findAll() {
-    return this.consultationsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.consultationsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConsultationDto: UpdateConsultationDto) {
-    return this.consultationsService.update(+id, updateConsultationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.consultationsService.remove(+id);
+  @Post('process')
+  @ResponseMessage('Proses Konsultasi Berhasil')
+  @UseGuards(AuthGuard)
+  processConsultation(
+    @Request() req: { username: string },
+    @Body() consultationProcessDto: ConsultationProcessDto,
+  ) {
+    return this.consultationsService.processConsultation(
+      req.username,
+      consultationProcessDto,
+    );
   }
 }
