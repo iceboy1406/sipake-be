@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -30,15 +30,15 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   address: string;
 
-  @OneToOne(() => CarSeries)
+  @ManyToOne(() => CarSeries)
   @JoinColumn({ name: 'car_series_id', referencedColumnName: 'series_id' })
   carSeries: CarSeries;
 
-  @OneToOne(() => CarYear)
+  @ManyToOne(() => CarYear)
   @JoinColumn({ name: 'car_year', referencedColumnName: 'year' })
   carYear: CarYear;
 
-  @OneToOne(() => EngineCode)
+  @ManyToOne(() => EngineCode)
   @JoinColumn({ name: 'engine_code', referencedColumnName: 'code' })
   engineCode: EngineCode;
 

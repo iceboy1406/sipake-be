@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Blackboard } from './entities/blackboard.entity';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Rule } from '../rules/entities/rule.entity';
 import { ConsultationProcessDto } from './dto/consultation-process.dto';
 import { TempConsultationHistory } from './entities/temp_consultation_history.entity';
@@ -15,7 +15,6 @@ export class ConsultationsService {
     private rulesRepository: Repository<Rule>,
     @InjectRepository(TempConsultationHistory)
     private tempConsultationHistoryRepository: Repository<TempConsultationHistory>,
-    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async startConsultation(username: string) {
@@ -28,23 +27,19 @@ export class ConsultationsService {
     });
 
     // Create a blackboard for each symptom of each rule
-    let blackboardId = 1;
     for (const rule of rules) {
       for (const symptom of rule.symptoms) {
         await this.blackboardRepository.save({
-          id: blackboardId,
           rule,
           user: { username },
           symptom,
         });
-
-        blackboardId++;
       }
     }
 
     // Return the first symptom as initial state
     const firstBlackboard = await this.blackboardRepository.findOne({
-      where: { id: 1 },
+      where: { user: { username } },
       relations: ['symptom'],
     });
 
@@ -58,8 +53,8 @@ export class ConsultationsService {
     // Save temp history
     await this.tempConsultationHistoryRepository.save({
       user: { username },
-      yes: consultationProcessDto.yes,
       symptom: { id: consultationProcessDto.symptom_id },
+      yes: consultationProcessDto.yes,
     });
 
     // Update data with same symptom depends on consultationProcessDto.yes
@@ -68,7 +63,7 @@ export class ConsultationsService {
         user: { username },
         symptom: { id: consultationProcessDto.symptom_id },
       },
-      { done: true, yes: consultationProcessDto.yes },
+      { done: true },
     );
 
     // If consultationProcessDto.yes is true, then delete all the blackboards with rules that not contains same symptom

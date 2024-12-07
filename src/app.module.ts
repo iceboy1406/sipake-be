@@ -15,6 +15,10 @@ import { ProblemsModule } from './problems/problems.module';
 import { SymptomsModule } from './symptoms/symptoms.module';
 import { RulesModule } from './rules/rules.module';
 import { ConsultationsModule } from './consultations/consultations.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -38,6 +42,31 @@ import { ConsultationsModule } from './consultations/consultations.module';
       global: true,
       signOptions: {
         expiresIn: process.env.JWT_EXPIRATION_TIME,
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/public',
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.MAILER_EMAIL,
+          pass: process.env.MAILER_PASSWORD,
+        },
+      },
+      defaults: {
+        from: '"No Reply" <ekosusilo140604@gmail.com>',
+      },
+      template: {
+        dir: join(__dirname, './mail/templates'),
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
       },
     }),
     UsersModule,

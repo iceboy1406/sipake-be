@@ -5,7 +5,7 @@ import { Symptom } from '../../symptoms/entities/symptom.entity';
 
 @Entity({ name: 'blackboards' })
 export class Blackboard {
-  @Column({ primary: true })
+  @Column({ primary: true, generated: 'increment' })
   id: number;
 
   @ManyToOne(() => Rule)
@@ -14,9 +14,6 @@ export class Blackboard {
 
   @Column({ type: 'boolean', default: false })
   done: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  yes: boolean;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })

@@ -50,16 +50,10 @@ export class RegisterDto {
   engine_code: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  car_year: number;
+  car_year: string;
 
   @IsNotEmpty()
   @IsString()
   @Length(1, 10)
   plateNumber: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @Length(1, 255)
-  profilePicture: string;
 }
