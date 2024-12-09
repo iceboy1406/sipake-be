@@ -10,7 +10,7 @@ export class TempConsultationHistory {
   @Column({ type: 'boolean', default: false })
   yes: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
 

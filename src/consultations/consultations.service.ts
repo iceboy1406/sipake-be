@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Rule } from '../rules/entities/rule.entity';
 import { ConsultationProcessDto } from './dto/consultation-process.dto';
 import { TempConsultationHistory } from './entities/temp_consultation_history.entity';
+import { ConsultationHistory } from './entities/consultation_history.entity';
 
 @Injectable()
 export class ConsultationsService {
@@ -15,6 +16,8 @@ export class ConsultationsService {
     private rulesRepository: Repository<Rule>,
     @InjectRepository(TempConsultationHistory)
     private tempConsultationHistoryRepository: Repository<TempConsultationHistory>,
+    @InjectRepository(ConsultationHistory)
+    private consultationHistoryRepository: Repository<ConsultationHistory>,
   ) {}
 
   async startConsultation(username: string) {
@@ -134,12 +137,16 @@ export class ConsultationsService {
           relations: [
             'rule',
             'rule.problem',
-            'rule.symptoms',
             'rule.problem.solution',
           ],
         });
 
         await this.deleteLastConsultationData(username);
+        await this.saveHistory(
+          username,
+          'Masalah Teridentifikasi',
+          finalBlackboard.rule.problem.id,
+        );
 
         return {
           status: 'Result',
@@ -172,12 +179,14 @@ export class ConsultationsService {
 
     if (allHistoryCount == noAnswerCount) {
       await this.deleteLastConsultationData(username);
+      await this.saveHistory(username, 'Tidak Ada Masalah', null);
       return {
         status: 'NeverHadAProblem',
         data: {},
       };
     } else {
       await this.deleteLastConsultationData(username);
+      await this.saveHistory(username, 'Masalah Tidak Teridentifikasi', null);
       return {
         status: 'ProblemNotFound',
         data: {},
@@ -185,7 +194,32 @@ export class ConsultationsService {
     }
   }
 
-  async saveHistory(username: string) {}
+  async saveHistory(
+    username: string,
+    status: string,
+    problem_id: string | null,
+  ) {
+    if (problem_id) {
+      await this.consultationHistoryRepository.save({
+        user: { username },
+        status,
+        problem: { id: problem_id },
+      });
+    } else {
+      await this.consultationHistoryRepository.save({
+        user: { username },
+        status,
+      });
+    }
+  }
+
+  getConsultationHistories(username: string) {
+    return this.consultationHistoryRepository.find({
+      where: { user: { username } },
+      relations: ['problem', 'problem.solution'],
+      order: { consultation_date: 'DESC' },
+    });
+  }
 
   async deleteLastConsultationData(username: string) {
     // Reset blackboard for current user

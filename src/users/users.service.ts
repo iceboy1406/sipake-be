@@ -45,7 +45,10 @@ export class UsersService {
       profilePicture: profilePicture.path,
     });
 
-    await this.sendVerificationEmail(user);
+    await this.sendVerificationEmail({
+      username: user.username,
+      targetUser: user,
+    });
 
     return user;
   }
@@ -66,6 +69,14 @@ export class UsersService {
 
     if (!isPasswordValid) {
       throw new HttpException('Password salah', 401);
+    }
+
+    if (!user.verified) {
+      await this.sendVerificationEmail({
+        username: user.username,
+        targetUser: user,
+      });
+      throw new HttpException('Email belum diverifikasi', 401);
     }
 
     const token = this.jwtService.sign({ username: user.username });
@@ -90,13 +101,25 @@ export class UsersService {
     ).toString();
     const expirationDate = new Date();
     expirationDate.setHours(expirationDate.getHours() + 1);
-
-    await this.verificationCodeRepository.save({
-      user,
-      code: verificationCode,
-      expired_date: expirationDate,
-    });
-
+    const oldVerificationCode = await this.verificationCodeRepository.findOneBy(
+      { user: { username } },
+    );
+    if (oldVerificationCode) {
+      await this.verificationCodeRepository.update(
+        { user: { username } },
+        {
+          code: verificationCode,
+          expired_date: expirationDate,
+        },
+      );
+    } else {
+      await this.verificationCodeRepository.save({
+        user,
+        code: verificationCode,
+        expired_date: expirationDate,
+      });
+    }
+    
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Email Verification',
@@ -106,6 +129,7 @@ export class UsersService {
         code: verificationCode,
       },
     });
+    console.log('Email sent');
   }
 
   async verifyEmail(username: string, code: string) {

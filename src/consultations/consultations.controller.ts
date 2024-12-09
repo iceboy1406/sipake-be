@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Request, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Body, Get } from '@nestjs/common';
 import { ConsultationsService } from './consultations.service';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -25,6 +25,17 @@ export class ConsultationsController {
     return this.consultationsService.processConsultation(
       req.username,
       consultationProcessDto,
+    );
+  }
+
+  @Get('histories')
+  @ResponseMessage('Berhasil mendapatkan riwayat konsultasi')
+  @UseGuards(AuthGuard)
+  getConsultationHistories(
+    @Request() req: { username: string },
+  ) {
+    return this.consultationsService.getConsultationHistories(
+      req.username,
     );
   }
 }

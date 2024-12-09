@@ -15,7 +15,7 @@ export class Blackboard {
   @Column({ type: 'boolean', default: false })
   done: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
 

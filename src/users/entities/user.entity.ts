@@ -30,15 +30,15 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   address: string;
 
-  @ManyToOne(() => CarSeries)
+  @ManyToOne(() => CarSeries, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'car_series_id', referencedColumnName: 'series_id' })
   carSeries: CarSeries;
 
-  @ManyToOne(() => CarYear)
+  @ManyToOne(() => CarYear, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'car_year', referencedColumnName: 'year' })
   carYear: CarYear;
 
-  @ManyToOne(() => EngineCode)
+  @ManyToOne(() => EngineCode, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'engine_code', referencedColumnName: 'code' })
   engineCode: EngineCode;
 

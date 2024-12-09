@@ -9,6 +9,7 @@ import { Solution } from '../solutions/entities/solution.entity';
 import { Rule } from '../rules/entities/rule.entity';
 import { RulesModule } from '../rules/rules.module';
 import { TempConsultationHistory } from './entities/temp_consultation_history.entity';
+import { ConsultationHistory } from './entities/consultation_history.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TempConsultationHistory } from './entities/temp_consultation_history.en
       Solution,
       Rule,
       TempConsultationHistory,
+      ConsultationHistory
     ]),
     RulesModule,
   ],
